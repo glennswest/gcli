@@ -2,6 +2,13 @@
 set -euo pipefail
 
 # Usage: ./scripts/release.sh [major|minor|patch]
+#
+# Bumps version, builds all platforms, commits, tags, pushes,
+# and creates a GitHub release with binaries attached.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_DIR"
 
 BUMP_TYPE="${1:-patch}"
 
@@ -24,7 +31,7 @@ NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 TAG="v${NEW_VERSION}"
 TODAY=$(date +%Y-%m-%d)
 
-echo "Bumping $CURRENT → $NEW_VERSION"
+echo "=== Releasing $CURRENT → $NEW_VERSION ==="
 
 # Update Cargo.toml
 if [[ "$(uname)" == "Darwin" ]]; then
@@ -43,6 +50,9 @@ else
     sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [${TAG}] — ${TODAY}/" CHANGELOG.md
 fi
 
+# Build all platforms
+"$SCRIPT_DIR/build.sh"
+
 # Commit, tag, push
 git add Cargo.toml Cargo.lock CHANGELOG.md
 git commit -m "chore(release): ${TAG}"
@@ -50,4 +60,13 @@ git tag "$TAG"
 git push origin main
 git push origin "$TAG"
 
-echo "Released ${TAG}"
+# Create GitHub release with binaries
+OUT_DIR="$PROJECT_DIR/build/out"
+gh release create "$TAG" \
+    --title "$TAG" \
+    --generate-notes \
+    "$OUT_DIR/gcli-linux-x86_64#gcli-linux-x86_64" \
+    "$OUT_DIR/gcli-macos-arm64#gcli-macos-arm64"
+
+echo "=== Released ${TAG} ==="
+echo "https://github.com/glennswest/gcli/releases/tag/${TAG}"

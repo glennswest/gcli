@@ -1,5 +1,6 @@
 # Build artifacts
 target/
+build/out/
 
 # Secrets and environment
 .env
