@@ -15,7 +15,7 @@ use transcribe_rs::{engines::whisper::WhisperEngine, TranscriptionEngine};
 mod agents; // multi-agent helpers (inline below)
 
 #[derive(Parser)]
-#[command(name = "gcli", about = "gcli v3 — Voice STT + Embedded PPTX + Grok Power", version = "3.0.0")]
+#[command(name = "gcli", about = "gcli v3 — Voice STT + Embedded PPTX + Grok Power", version = env!("CARGO_PKG_VERSION"))]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -391,7 +391,7 @@ async fn git_agent(action: &str) -> Result<()> {
 
 async fn self_update() -> Result<()> {
     let status = self_update::backends::github::Update::configure()
-        .repo_owner("yourusername")
+        .repo_owner("glennswest")
         .repo_name("gcli")
         .bin_name("gcli")
         .show_download_progress(true)
