@@ -11,18 +11,22 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
-            target: x86_64-apple-darwin
+            binary: gcli-macos-arm64
+          - os: macos-13
             binary: gcli-macos-x86_64
           - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
             binary: gcli-linux-x86_64
+          - os: ubuntu-24.04-arm
+            binary: gcli-linux-arm64
           - os: windows-latest
-            target: x86_64-pc-windows-msvc
             binary: gcli-windows-x86_64.exe
     runs-on: ${{ matrix.os }}
+    env:
+      GGML_VULKAN: "OFF"
     steps:
       - uses: actions/checkout@v4
 
@@ -30,7 +34,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Linux deps
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libasound2-dev libespeak-ng-dev pkg-config cmake
@@ -39,11 +43,11 @@ jobs:
         run: cargo build --release
 
       - name: Rename binary (Unix)
-        if: matrix.os != 'windows-latest'
+        if: runner.os != 'Windows'
         run: mv target/release/gcli ${{ matrix.binary }}
 
       - name: Rename binary (Windows)
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
         run: mv target/release/gcli.exe ${{ matrix.binary }}
 
       - name: Upload artifact
@@ -68,6 +72,8 @@ jobs:
         with:
           generate_release_notes: true
           files: |
+            artifacts/gcli-macos-arm64/gcli-macos-arm64
             artifacts/gcli-macos-x86_64/gcli-macos-x86_64
             artifacts/gcli-linux-x86_64/gcli-linux-x86_64
+            artifacts/gcli-linux-arm64/gcli-linux-arm64
             artifacts/gcli-windows-x86_64.exe/gcli-windows-x86_64.exe

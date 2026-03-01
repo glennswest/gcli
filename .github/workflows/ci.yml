@@ -9,6 +9,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      GGML_VULKAN: "OFF"
     steps:
       - uses: actions/checkout@v4
 
