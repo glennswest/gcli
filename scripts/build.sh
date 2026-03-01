@@ -13,7 +13,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SSH="ssh -o ServerAliveInterval=30"
-REMOTE="core@192.168.10.10"
+REMOTE="core@server1.g10.lo"
 REMOTE_SRC="/var/gcli/src"
 REMOTE_CARGO_REGISTRY="/var/gcli/cargo-registry"
 REMOTE_CARGO_GIT="/var/gcli/cargo-git"
