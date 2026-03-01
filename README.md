@@ -21,10 +21,48 @@ Grok-powered CLI tool with voice STT, embedded PPTX generation, multi-agent work
 - For voice: a working microphone and Whisper model at `~/.gcli/models/whisper-medium-q4_1.bin`
 - For local mode: [Ollama](https://ollama.ai) running with `llama3.2`
 
-## Build
+## Install
+
+Download a pre-built binary from [Releases](https://github.com/glennswest/gcli/releases):
+
+| Platform | Binary |
+|----------|--------|
+| macOS ARM64 | `gcli-macos-arm64` |
+| Linux x86_64 | `gcli-linux-x86_64` |
+
+```bash
+# Example: install on Linux
+curl -Lo gcli https://github.com/glennswest/gcli/releases/latest/download/gcli-linux-x86_64
+chmod +x gcli
+sudo mv gcli /usr/local/bin/
+```
+
+Or update from an existing install:
+
+```bash
+gcli update
+```
+
+## Build from Source
 
 ```bash
 cargo build --release
+```
+
+### Multi-platform release build
+
+Builds Linux x86_64 on server1 via podman and macOS ARM64 locally:
+
+```bash
+./scripts/build.sh
+```
+
+### Cut a release
+
+Bumps version, builds all platforms, tags, and creates a GitHub release:
+
+```bash
+./scripts/release.sh patch   # or minor, major
 ```
 
 ## Usage
