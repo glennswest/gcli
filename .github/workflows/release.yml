@@ -26,7 +26,7 @@ jobs:
             binary: gcli-windows-x86_64.exe
     runs-on: ${{ matrix.os }}
     env:
-      GGML_VULKAN: "OFF"
+      CMAKE_DISABLE_FIND_PACKAGE_Vulkan: "TRUE"
     steps:
       - uses: actions/checkout@v4
 

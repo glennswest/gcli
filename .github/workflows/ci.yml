@@ -10,7 +10,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     env:
-      GGML_VULKAN: "OFF"
+      CMAKE_DISABLE_FIND_PACKAGE_Vulkan: "TRUE"
     steps:
       - uses: actions/checkout@v4
 
