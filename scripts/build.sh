@@ -40,7 +40,8 @@ $SSH "$REMOTE" "cd $REMOTE_SRC && CONTAINER_HOST= podman build -t $BUILDER_IMAGE
 
 # --- Linux x86_64 build on server1 ---
 echo "--- Building Linux x86_64 on server1 ---"
-$SSH "$REMOTE" "CONTAINER_HOST= podman run --rm --name gcli-x86_64 \
+$SSH "$REMOTE" "CONTAINER_HOST= podman rm -f gcli-x86_64 2>/dev/null; \
+    CONTAINER_HOST= podman run --rm --name gcli-x86_64 \
     --security-opt label=disable \
     -v $REMOTE_SRC:/src:ro \
     -v $REMOTE_CARGO_REGISTRY:/usr/local/cargo/registry \
