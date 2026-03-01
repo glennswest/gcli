@@ -12,6 +12,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SSH="ssh -o ServerAliveInterval=30"
 REMOTE="core@192.168.10.10"
 REMOTE_SRC="/var/gcli/src"
 REMOTE_CARGO_REGISTRY="/var/gcli/cargo-registry"
@@ -26,7 +27,7 @@ echo "=== Building gcli ==="
 
 # --- Clone or pull source on server1 ---
 echo "--- Updating source on server1 ---"
-ssh "$REMOTE" "sudo mkdir -p /var/gcli && sudo chown -R \$(id -u):\$(id -g) /var/gcli && \
+$SSH "$REMOTE" "sudo mkdir -p /var/gcli && sudo chown -R \$(id -u):\$(id -g) /var/gcli && \
     mkdir -p $REMOTE_CARGO_REGISTRY $REMOTE_CARGO_GIT $REMOTE_TARGET && \
     if [ -d $REMOTE_SRC/.git ]; then \
         cd $REMOTE_SRC && git pull; \
@@ -35,11 +36,11 @@ ssh "$REMOTE" "sudo mkdir -p /var/gcli && sudo chown -R \$(id -u):\$(id -g) /var
     fi"
 
 echo "--- Building container image on server1 ---"
-ssh "$REMOTE" "cd $REMOTE_SRC && CONTAINER_HOST= podman build -t $BUILDER_IMAGE -f Containerfile ."
+$SSH "$REMOTE" "cd $REMOTE_SRC && CONTAINER_HOST= podman build -t $BUILDER_IMAGE -f Containerfile ."
 
 # --- Linux x86_64 build on server1 ---
 echo "--- Building Linux x86_64 on server1 ---"
-ssh "$REMOTE" "CONTAINER_HOST= podman run --rm --name gcli-x86_64 \
+$SSH "$REMOTE" "CONTAINER_HOST= podman run --rm --name gcli-x86_64 \
     --security-opt label=disable \
     -v $REMOTE_SRC:/src:ro \
     -v $REMOTE_CARGO_REGISTRY:/usr/local/cargo/registry \
