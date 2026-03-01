@@ -31,7 +31,7 @@ ssh "$REMOTE" "sudo mkdir -p /var/gcli && sudo chown -R \$(id -u):\$(id -g) /var
     if [ -d $REMOTE_SRC/.git ]; then \
         cd $REMOTE_SRC && git pull; \
     else \
-        git clone git@github.com:glennswest/gcli.git $REMOTE_SRC; \
+        git clone https://github.com/glennswest/gcli.git $REMOTE_SRC; \
     fi"
 
 echo "--- Building container image on server1 ---"
