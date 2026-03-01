@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [v3.0.2] — 2026-03-01
 - **feat:** Podman-based builds on server1 for Linux x86_64, local macOS ARM64 build
 - **refactor:** Replace GitHub Actions Linux/macOS builds with server1 podman builds
 - **feat:** Build script (`scripts/build.sh`) for multi-platform builds
