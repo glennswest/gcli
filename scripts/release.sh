@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Usage: ./scripts/release.sh [major|minor|patch]
 #
-# Bumps version, builds all platforms, commits, tags, pushes,
-# and creates a GitHub release with binaries attached.
+# Bumps version, commits, pushes, builds all platforms on server1 + locally,
+# tags, and creates a GitHub release with binaries attached.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -50,14 +50,16 @@ else
     sed -i "s/^## \[Unreleased\]/## [Unreleased]\n\n## [${TAG}] — ${TODAY}/" CHANGELOG.md
 fi
 
-# Build all platforms
-"$SCRIPT_DIR/build.sh"
-
-# Commit, tag, push
+# Commit and push first so server1 can git pull
 git add Cargo.toml Cargo.lock CHANGELOG.md
 git commit -m "chore(release): ${TAG}"
-git tag "$TAG"
 git push origin main
+
+# Build all platforms (server1 git pulls, local macOS builds)
+"$SCRIPT_DIR/build.sh"
+
+# Tag and push tag
+git tag "$TAG"
 git push origin "$TAG"
 
 # Create GitHub release with binaries

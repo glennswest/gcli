@@ -7,11 +7,12 @@ set -euo pipefail
 #
 # Usage: ./scripts/build.sh
 #
+# Prerequisites: commit and push changes before running.
 # Outputs binaries to build/out/
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-REMOTE="core@server1.g10.lo"
+REMOTE="core@192.168.10.10"
 REMOTE_SRC="/var/gcli/src"
 REMOTE_CARGO_REGISTRY="/var/gcli/cargo-registry"
 REMOTE_CARGO_GIT="/var/gcli/cargo-git"
@@ -23,12 +24,15 @@ mkdir -p "$OUT_DIR"
 
 echo "=== Building gcli ==="
 
-# --- Ensure builder image exists on server1 ---
-echo "--- Syncing source to server1 ---"
-ssh "$REMOTE" "sudo mkdir -p $REMOTE_SRC $REMOTE_CARGO_REGISTRY $REMOTE_CARGO_GIT $REMOTE_TARGET"
-rsync -az --delete \
-    --exclude target/ --exclude build/out/ --exclude .git/ \
-    "$PROJECT_DIR/" "$REMOTE:$REMOTE_SRC/"
+# --- Clone or pull source on server1 ---
+echo "--- Updating source on server1 ---"
+ssh "$REMOTE" "sudo mkdir -p /var/gcli && sudo chown -R \$(id -u):\$(id -g) /var/gcli && \
+    mkdir -p $REMOTE_CARGO_REGISTRY $REMOTE_CARGO_GIT $REMOTE_TARGET && \
+    if [ -d $REMOTE_SRC/.git ]; then \
+        cd $REMOTE_SRC && git pull; \
+    else \
+        git clone git@github.com:glennswest/gcli.git $REMOTE_SRC; \
+    fi"
 
 echo "--- Building container image on server1 ---"
 ssh "$REMOTE" "cd $REMOTE_SRC && CONTAINER_HOST= podman build -t $BUILDER_IMAGE -f Containerfile ."
@@ -45,7 +49,7 @@ ssh "$REMOTE" "CONTAINER_HOST= podman run --rm --name gcli-x86_64 \
         cargo build --release && strip /build/target/release/gcli'"
 
 echo "--- Fetching Linux x86_64 binary ---"
-rsync -az "$REMOTE:$REMOTE_TARGET/release/gcli" "$OUT_DIR/gcli-linux-x86_64"
+scp "$REMOTE:$REMOTE_TARGET/release/gcli" "$OUT_DIR/gcli-linux-x86_64"
 
 # --- macOS ARM64 build locally ---
 echo "--- Building macOS ARM64 locally ---"
